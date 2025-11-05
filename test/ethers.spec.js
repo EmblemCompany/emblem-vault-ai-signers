@@ -80,6 +80,9 @@ describe("ethers adapter", () => {
     const wallet = await client.toEthersWallet(null);
 
     expect(await wallet.getAddress()).toBe(KNOWN_INFO.evmAddress);
+    expect(wallet.getVaultId()).toBe(KNOWN_INFO.vaultId);
+    wallet.setChainId(11155111);
+    expect(wallet.getChainId()).toBe(11155111);
 
     const sig1 = await wallet.signMessage("hello");
     expect(sig1).toBe("0xaaaabbbb");

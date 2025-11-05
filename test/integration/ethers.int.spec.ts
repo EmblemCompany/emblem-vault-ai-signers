@@ -12,6 +12,9 @@ describe("integration: ethers adapter", () => {
     const client = createEmblemClient({ apiKey: API_KEY!, baseUrl: BASE_URL });
     const wallet = await client.toEthersWallet(null);
     const addr = await wallet.getAddress();
+    const vaultId = wallet.getVaultId();
+    expect(typeof vaultId).toBe("string");
+    expect(vaultId.length).toBeGreaterThan(0);
     const message = `hello-from-integration-${Date.now()}`;
     const sig = await wallet.signMessage(message);
     const rec = verifyMessage(message, sig);

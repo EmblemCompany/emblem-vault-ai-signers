@@ -18,6 +18,7 @@ export async function fetchVaultInfo(config: EmblemRemoteConfig): Promise<VaultI
 
   return {
     vaultId: data.vaultId,
+    tokenId: data.vaultId,
     address: data.address,
     evmAddress: data.evmAddress,
     created_by: data.created_by,

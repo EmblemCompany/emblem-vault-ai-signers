@@ -10,6 +10,7 @@ export type EmblemRemoteConfig = {
 
 export type VaultInfo = {
   vaultId: string;
+  tokenId?: string; // alias of vaultId for compatibility
   address: string; // Solana address
   evmAddress: `0x${string}`;
   created_by?: string;

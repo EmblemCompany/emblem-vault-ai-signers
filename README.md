@@ -4,6 +4,8 @@ Remote signer adapters for Emblem Vault that plug into popular Ethereum librarie
 
 - `toViemAccount()` – creates a viem `Account` that signs via Emblem
 - `toEthersWallet()` – creates an ethers v6 `Signer` that signs via Emblem
+  - Implements `initialize()`, `getVaultId()`, `setChainId()`, `getChainId()`
+  - Adds `signAndBroadcast(tx, waitForReceipt?)` helper (optional)
 - `toWeb3Adapter()` – returns a minimal Web3-style signer adapter (EVM)
 - `toSolanaWeb3Signer()` – returns a stub Solana signer with `publicKey`
 - `toSolanaKitSigner()` – returns a stub Solana signer with `publicKey`
@@ -39,7 +41,17 @@ const viemClient = createPublicClient({ chain: mainnet, transport: http() });
 // ethers v6
 const provider = new JsonRpcProvider(process.env.RPC_URL!);
 const wallet = await client.toEthersWallet(provider);
-// e.g. await wallet.sendTransaction({ to: "0x...", value: 1n })
+
+// Read metadata
+const addr = await wallet.getAddress();
+const vaultId = wallet.getVaultId();
+
+// Sign & send via ethers Provider
+await wallet.signMessage("hello");
+await wallet.sendTransaction({ to: "0x...", value: 1n });
+
+// Or sign and broadcast, returning tx hash
+const txHash = await wallet.signAndBroadcast({ to: "0x...", value: 1n }, true);
 
 // web3.js-like adapter (minimal)
 const web3Adapter = await client.toWeb3Adapter();
@@ -171,6 +183,13 @@ EmblemVaultClient#toEthersWallet(provider?): Promise<Signer>
 EmblemVaultClient#toWeb3Adapter(): Promise<{ address, signMessage, signTypedData, signTransaction }>
 EmblemVaultClient#toSolanaWeb3Signer(): Promise<{ publicKey }>
 EmblemVaultClient#toSolanaKitSigner(): Promise<{ publicKey }>
+
+Ethers wallet (v6) adds:
+- initialize(): Promise<void>
+- getVaultId(): string
+- setChainId(n: number): void
+- getChainId(): number
+- signAndBroadcast(tx: TransactionRequest, waitForReceipt?: boolean): Promise<string>
 ```
 
 Adapters POST to the Emblem API endpoints:
