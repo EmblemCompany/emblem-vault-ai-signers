@@ -1,7 +1,7 @@
-import type { EmblemRemoteConfig, Hex, VaultInfo } from "./types";
-import { emblemPost } from "./http";
-import { bytesToHex, normalizeTxForEmblem } from "./utils";
-import { fetchVaultInfo } from "./vault";
+import type { EmblemRemoteConfig, Hex, VaultInfo } from "./types.js";
+import { emblemPost } from "./http.js";
+import { bytesToHex, normalizeTxForEmblem } from "./utils.js";
+import { fetchVaultInfo } from "./vault.js";
 import { AbstractSigner, resolveAddress } from "ethers";
 import type {
   Provider,

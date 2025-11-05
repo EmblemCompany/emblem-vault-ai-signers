@@ -1,23 +1,23 @@
 import type { Provider } from "ethers";
-import type { EmblemRemoteConfig } from "./types";
-export type { EmblemRemoteConfig, Hex, VaultInfo } from "./types";
+import type { EmblemRemoteConfig } from "./types.js";
+export type { EmblemRemoteConfig, Hex, VaultInfo } from "./types.js";
 
-import { toViemAccount } from "./viem";
-import { toEthersWallet, EmblemEthersWallet } from "./ethers";
-import { toSolanaKitSigner, toSolanaWeb3Signer, EmblemSolanaSigner } from "./solana";
-import { toWeb3Adapter, EmblemWeb3Adapter } from "./web3";
-import { fetchVaultInfo } from "./vault";
+import { toViemAccount } from "./viem.js";
+import { toEthersWallet, EmblemEthersWallet } from "./ethers.js";
+import { toSolanaKitSigner, toSolanaWeb3Signer, EmblemSolanaSigner } from "./solana.js";
+import { toWeb3Adapter, EmblemWeb3Adapter } from "./web3.js";
+import { fetchVaultInfo } from "./vault.js";
 
 export class EmblemVaultClient {
   private readonly config: EmblemRemoteConfig;
-  private _infoPromise?: Promise<import("./types").VaultInfo>;
+  private _infoPromise?: Promise<import("./types.js").VaultInfo>;
 
   constructor(config: EmblemRemoteConfig) {
     this.config = config;
   }
 
   /** Lazily fetch and cache vault info */
-  private getInfo(): Promise<import("./types").VaultInfo> {
+  private getInfo(): Promise<import("./types.js").VaultInfo> {
     if (!this._infoPromise) this._infoPromise = fetchVaultInfo(this.config);
     return this._infoPromise;
   }

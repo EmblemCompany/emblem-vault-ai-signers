@@ -1,9 +1,9 @@
-import type { Hex, EmblemRemoteConfig, VaultInfo } from "./types";
-import { emblemPost } from "./http";
-import { bytesToHex, isHexString, normalizeTxForEmblem } from "./utils";
+import type { Hex, EmblemRemoteConfig, VaultInfo } from "./types.js";
+import { emblemPost } from "./http.js";
+import { bytesToHex, isHexString, normalizeTxForEmblem } from "./utils.js";
 import type { TypedDataDefinition } from "viem";
 import { toAccount } from "viem/accounts";
-import { fetchVaultInfo } from "./vault";
+import { fetchVaultInfo } from "./vault.js";
 
 export async function toViemAccount(config: EmblemRemoteConfig, infoOverride?: VaultInfo) {
   const info = infoOverride ?? await fetchVaultInfo(config);
