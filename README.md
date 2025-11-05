@@ -12,6 +12,8 @@ Remote signer adapters for Emblem Vault that plug into popular Ethereum librarie
 
 > Note: The ethers adapter targets ethers v6.
 
+See the Changelog for release details: CHANGELOG.md
+
 ## Install
 
 ```
