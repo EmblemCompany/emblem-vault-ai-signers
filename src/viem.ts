@@ -35,7 +35,7 @@ export async function toViemAccount(config: EmblemRemoteConfig, infoOverride?: V
       return data.signature;
     },
 
-    async signTypedData(typedData: TypedDataDefinition) {
+    async signTypedData(typedData: any) {
       const { domain, types, message } = typedData as any;
       const data = await emblemPost<{
         signerAddress: string;

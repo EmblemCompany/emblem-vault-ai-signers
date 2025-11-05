@@ -1,6 +1,6 @@
 {
   "name": "emblem-vault-ai-signers",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Emblem Vault remote signer adapters for viem and ethers",
   "type": "module",
   "main": "dist/index.js",
@@ -9,8 +9,10 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist"
