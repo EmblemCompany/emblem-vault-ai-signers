@@ -1,7 +1,7 @@
-import type { EmblemRemoteConfig, Hex, VaultInfo } from "./types";
-import { emblemPost } from "./http";
-import { bytesToHex, isHexString, normalizeTxForEmblem } from "./utils";
-import { fetchVaultInfo } from "./vault";
+import type { EmblemRemoteConfig, Hex, VaultInfo } from "./types.js";
+import { emblemPost } from "./http.js";
+import { bytesToHex, isHexString, normalizeTxForEmblem } from "./utils.js";
+import { fetchVaultInfo } from "./vault.js";
 
 export class EmblemWeb3Adapter {
   readonly address: `0x${string}`;
@@ -48,4 +48,3 @@ export async function toWeb3Adapter(config: EmblemRemoteConfig, infoOverride?: V
   const info = infoOverride ?? (await fetchVaultInfo(config));
   return new EmblemWeb3Adapter(info.evmAddress, info.vaultId, config);
 }
-

@@ -1,5 +1,5 @@
-import type { EmblemRemoteConfig, VaultInfo } from "./types";
-import { fetchVaultInfo } from "./vault";
+import type { EmblemRemoteConfig, VaultInfo } from "./types.js";
+import { fetchVaultInfo } from "./vault.js";
 
 export class EmblemSolanaSigner {
   readonly publicKey: string; // base58 address
@@ -25,4 +25,3 @@ export async function toSolanaKitSigner(config: EmblemRemoteConfig, infoOverride
   const info = infoOverride ?? (await fetchVaultInfo(config));
   return new EmblemSolanaSigner(info.address);
 }
-

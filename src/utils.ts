@@ -1,4 +1,4 @@
-import type { Hex } from "./types";
+import type { Hex } from "./types.js";
 
 export function toHexIfBigInt(v: any): any {
   return typeof v === "bigint" ? ("0x" + v.toString(16)) : v;

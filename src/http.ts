@@ -1,4 +1,4 @@
-import type { EmblemRemoteConfig } from "./types";
+import type { EmblemRemoteConfig } from "./types.js";
 
 export async function emblemPost<T = any>(
   path: string,

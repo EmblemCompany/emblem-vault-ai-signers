@@ -1,5 +1,5 @@
-import type { EmblemRemoteConfig, VaultInfo } from "./types";
-import { emblemGet, emblemPost } from "./http";
+import type { EmblemRemoteConfig, VaultInfo } from "./types.js";
+import { emblemGet, emblemPost } from "./http.js";
 
 export async function fetchVaultInfo(config: EmblemRemoteConfig): Promise<VaultInfo> {
   let data: {
