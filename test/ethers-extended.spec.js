@@ -8,7 +8,7 @@ vi.mock("ethers", () => {
 
 function okJson(data) { return { ok: true, status: 200, json: async () => data, text: async () => JSON.stringify(data) }; }
 
-const API_KEY = "k";
+const API_KEY = "pk_test_1234567890abcdef";
 const BASE_URL = "https://dev-api.emblemvault.ai";
 const INFO = { vaultId: "1", address: "Sol", evmAddress: "0x1111111111111111111111111111111111111111" };
 
@@ -17,7 +17,7 @@ describe("ethers extended", () => {
     const fetchMock = vi.fn(async (url, init = {}) => {
       const u = new URL(String(url));
       const method = (init.method || "GET").toUpperCase();
-      if (u.pathname === "/vault/info" && method === "GET") return okJson(INFO);
+      if (u.pathname === "/vault/info" && method === "POST") return okJson(INFO);
       if (u.pathname === "/sign-eth-tx" && method === "POST") return okJson({ signedTransaction: "0xsigned" });
       throw new Error("unexpected fetch");
     });

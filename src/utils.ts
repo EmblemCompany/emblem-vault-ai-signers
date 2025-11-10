@@ -1,4 +1,5 @@
 import type { Hex } from "./types.js";
+import { toSafeNumber } from "./validation.js";
 
 export function toHexIfBigInt(v: any): any {
   return typeof v === "bigint" ? ("0x" + v.toString(16)) : v;
@@ -8,6 +9,7 @@ export function toHexIfBigInt(v: any): any {
  * viem txs sometimes have bigint / hex / optional fields. Ethers serializers
  * accept hex strings for numeric fields. Normalize where helpful.
  */
+
 export function normalizeTxForEmblem(tx: any): any {
   const out: any = { ...tx };
 
@@ -20,8 +22,8 @@ export function normalizeTxForEmblem(tx: any): any {
   if (out.gasPrice !== undefined) out.gasPrice = toHexIfBigInt(out.gasPrice);
   if (out.maxFeePerGas !== undefined) out.maxFeePerGas = toHexIfBigInt(out.maxFeePerGas);
   if (out.maxPriorityFeePerGas !== undefined) out.maxPriorityFeePerGas = toHexIfBigInt(out.maxPriorityFeePerGas);
-  if (out.nonce !== undefined) out.nonce = Number(out.nonce);
-  if (out.chainId !== undefined) out.chainId = Number(out.chainId);
+  if (out.nonce !== undefined) out.nonce = toSafeNumber(out.nonce, 'nonce');
+  if (out.chainId !== undefined) out.chainId = toSafeNumber(out.chainId, 'chainId');
 
   // Some backends only accept legacy fields; fold EIP-1559 into gasPrice and drop unsupported keys
   if (out.maxFeePerGas !== undefined || out.maxPriorityFeePerGas !== undefined) {

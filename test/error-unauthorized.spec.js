@@ -34,7 +34,7 @@ describe("unauthorized error handling", () => {
     global.fetch = fetchMock;
 
     const { createEmblemClient } = await import("../src/index.ts");
-    const client = createEmblemClient({ apiKey: "invalid", baseUrl: "https://dev-api.emblemvault.ai" });
+    const client = createEmblemClient({ apiKey: "pk_invalid_1234567890ab", baseUrl: "https://dev-api.emblemvault.ai" });
     await expect(client.toViemAccount()).rejects.toThrow(/401/);
   });
 
@@ -48,7 +48,7 @@ describe("unauthorized error handling", () => {
     global.fetch = fetchMock;
 
     const { createEmblemClient } = await import("../src/index.ts");
-    const client = createEmblemClient({ apiKey: "invalid", baseUrl: "https://dev-api.emblemvault.ai" });
+    const client = createEmblemClient({ apiKey: "pk_invalid_1234567890ab", baseUrl: "https://dev-api.emblemvault.ai" });
     await expect(client.toEthersWallet(null)).rejects.toThrow(/401/);
   });
 
@@ -62,7 +62,7 @@ describe("unauthorized error handling", () => {
     global.fetch = fetchMock;
 
     const { createEmblemClient } = await import("../src/index.ts");
-    const client = createEmblemClient({ apiKey: "invalid", baseUrl: "https://dev-api.emblemvault.ai" });
+    const client = createEmblemClient({ apiKey: "pk_invalid_1234567890ab", baseUrl: "https://dev-api.emblemvault.ai" });
     await expect(client.toWeb3Adapter()).rejects.toThrow(/401/);
   });
 
@@ -70,7 +70,7 @@ describe("unauthorized error handling", () => {
     const fetchMock = vi.fn(async (url, init = {}) => {
       const u = new URL(String(url));
       const method = (init.method || "GET").toUpperCase();
-      if (u.pathname === "/vault/info" && method === "GET") return okJson(KNOWN_INFO);
+      if (u.pathname === "/vault/info" && method === "POST") return okJson(KNOWN_INFO);
       if (u.pathname === "/sign-eth-message" && method === "POST") return unauthorized();
       throw new Error("unexpected call");
     });
@@ -78,7 +78,7 @@ describe("unauthorized error handling", () => {
     global.fetch = fetchMock;
 
     const { createEmblemClient } = await import("../src/index.ts");
-    const client = createEmblemClient({ apiKey: "invalid", baseUrl: "https://dev-api.emblemvault.ai" });
+    const client = createEmblemClient({ apiKey: "pk_invalid_1234567890ab", baseUrl: "https://dev-api.emblemvault.ai" });
 
     // viem
     const account = await client.toViemAccount();

@@ -41,7 +41,7 @@ describe("ethers adapter", () => {
       const u = new URL(String(url));
       const method = (init.method || "GET").toUpperCase();
 
-      if (u.pathname === "/vault/info" && method === "GET") {
+      if (u.pathname === "/vault/info" && method === "POST") {
         expect(init.headers?.["x-api-key"]).toBe(API_KEY);
         return okJson(KNOWN_INFO);
       }

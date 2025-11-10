@@ -24,7 +24,8 @@ export async function toViemAccount(config: EmblemRemoteConfig, infoOverride?: V
       } else if (isHexString(message)) {
         payload = message as string;
       } else {
-        payload = String(message);
+        // Don't silently convert objects to "[object Object]"
+        throw new Error(`Unsupported message type: ${typeof message}. Expected string, Uint8Array, or hex string.`);
       }
 
       const data = await emblemPost<{

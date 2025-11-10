@@ -1,24 +1,36 @@
 import type { Provider } from "ethers";
 import type { EmblemRemoteConfig } from "./types.js";
 export type { EmblemRemoteConfig, Hex, VaultInfo } from "./types.js";
+export type { EmblemSecurityConfig } from "./validation.js";
+export { isBrowserEnvironment, isNodeEnvironment } from "./validation.js";
 
 import { toViemAccount } from "./viem.js";
 import { toEthersWallet, EmblemEthersWallet } from "./ethers.js";
 import { toSolanaKitSigner, toSolanaWeb3Signer, EmblemSolanaSigner } from "./solana.js";
 import { toWeb3Adapter, EmblemWeb3Adapter } from "./web3.js";
 import { fetchVaultInfo } from "./vault.js";
+import { validateConfig, type EmblemSecurityConfig } from "./validation.js";
 
 export class EmblemVaultClient {
   private readonly config: EmblemRemoteConfig;
   private _infoPromise?: Promise<import("./types.js").VaultInfo>;
 
-  constructor(config: EmblemRemoteConfig) {
+  constructor(config: EmblemRemoteConfig | EmblemSecurityConfig) {
+    // Comprehensive security validation
+    validateConfig(config as EmblemSecurityConfig);
+
     this.config = config;
   }
 
   /** Lazily fetch and cache vault info */
   private getInfo(): Promise<import("./types.js").VaultInfo> {
-    if (!this._infoPromise) this._infoPromise = fetchVaultInfo(this.config);
+    if (!this._infoPromise) {
+      this._infoPromise = fetchVaultInfo(this.config).catch(err => {
+        // Clear cache on error to allow retry
+        this._infoPromise = undefined;
+        throw err;
+      });
+    }
     return this._infoPromise;
   }
 

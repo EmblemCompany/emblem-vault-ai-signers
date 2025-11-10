@@ -1,19 +1,23 @@
 import type { EmblemRemoteConfig, VaultInfo } from "./types.js";
-import { emblemGet, emblemPost } from "./http.js";
+import { emblemPost } from "./http.js";
 
 export async function fetchVaultInfo(config: EmblemRemoteConfig): Promise<VaultInfo> {
-  let data: {
+  // Note: The server only supports POST for /vault/info
+  // No need to try GET first, just use POST directly
+  const data: {
     vaultId: string;
     address: string;
     evmAddress: `0x${string}`;
     created_by?: string;
-  };
+  } = await emblemPost("/vault/info", {}, config);
 
-  try {
-    data = await emblemGet("/vault/info", config);
-  } catch (err: any) {
-    // Some environments may require POST for this endpoint; try POST fallback
-    data = await emblemPost("/vault/info", {}, config);
+  // Validate response data
+  if (!data.vaultId || !data.address || !data.evmAddress) {
+    throw new Error('Invalid vault info response: missing required fields');
+  }
+
+  if (!data.evmAddress.startsWith('0x')) {
+    throw new Error('Invalid evmAddress format in response');
   }
 
   return {

@@ -17,6 +17,7 @@ export class EmblemEthersWallet extends AbstractSigner {
   private _address: `0x${string}` | null = null;
   private _vaultId: string | null = null;
   private _chainId = 1;
+  private _initPromise?: Promise<void>;
 
   constructor(config: EmblemRemoteConfig, provider?: Provider | null, seed?: { address?: `0x${string}`; vaultId?: string; chainId?: number }) {
     super(provider ?? null);
@@ -27,9 +28,19 @@ export class EmblemEthersWallet extends AbstractSigner {
   }
 
   async initialize(): Promise<void> {
-    const info = await fetchVaultInfo(this._config);
-    this._address = info.evmAddress;
-    this._vaultId = info.vaultId;
+    // Prevent race condition: cache the promise
+    if (this._initPromise) return this._initPromise;
+
+    this._initPromise = fetchVaultInfo(this._config).then(info => {
+      this._address = info.evmAddress;
+      this._vaultId = info.vaultId;
+    }).catch(err => {
+      // Clear promise on error to allow retry
+      this._initPromise = undefined;
+      throw err;
+    });
+
+    return this._initPromise;
   }
 
   async getAddress(): Promise<string> {
@@ -96,9 +107,12 @@ export class EmblemEthersWallet extends AbstractSigner {
     if (!this._vaultId) await this.initialize();
     const from = (tx as any).from as string | undefined;
     const addr = await this.getAddress();
+
+    // Validate from address if present, ensure it matches signer
     if (from && from.toLowerCase() !== addr.toLowerCase()) {
       throw new Error("transaction from does not match signer address");
     }
+
     const toSign = this.provider ? await this.populateTransaction(tx) : { ...tx };
     if ((toSign as any).from) delete (toSign as any).from;
     if (!('to' in (toSign as any)) || !(toSign as any).to) {

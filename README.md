@@ -208,6 +208,82 @@ On first use, both adapters query `GET /vault/info` with header `x-api-key` to o
 
 Transactions are normalized to hex/number-like fields before submission.
 
+## Security Considerations
+
+### Client-Side Usage
+
+This library is designed for environments where **users provide their own API keys**. When used client-side (browser/dApp):
+
+#### Trust Model
+- **Users must trust the dApp code** - Any JavaScript running in the browser has full access to API keys
+- **No technical enforcement possible** - Browser dev tools, breakpoints, and code injection can modify any behavior
+- **baseUrl is configurable** - Required for development/staging/production environments
+- **Transparent by design** - This is a feature, not a bug
+
+#### What This Means
+```javascript
+// Users provide their OWN API keys to YOUR dApp
+const client = createEmblemClient({
+  apiKey: userApiKey, // User's key, not yours
+  baseUrl: "https://api.emblemvault.ai"
+});
+```
+
+If a user runs your dApp code, they are trusting it with their API key and signing authority. There is no way to prevent malicious dApp code from:
+- Logging API keys
+- Intercepting `fetch()` calls
+- Changing the `baseUrl`
+- Making unauthorized signing requests
+
+**This is the same trust model as MetaMask and other browser wallets.**
+
+### Best Practices for Users
+
+1. **Only use trusted dApps** - Verify the source and reputation
+2. **Review open source code** when possible
+3. **Use separate API keys** for different dApps
+4. **Monitor signing activity** in your Emblem dashboard
+5. **Test with staging keys first** before using production
+
+### Best Practices for Implementers
+
+1. **Open source your dApp** - Allow security audits
+2. **Document your security model** - Be transparent about API key handling
+3. **Minimize dependencies** - Reduce supply chain attack surface
+4. **Use Content Security Policy** - Add CSP headers to protect against XSS
+5. **Never log or store user API keys** - Only use them in-memory for signing
+6. **Implement proper error handling** - Don't expose API keys in error messages
+
+### Server-Side Usage
+
+When used server-side (Node.js):
+- Store API keys in environment variables
+- Never expose keys to client-side code
+- Use proper access controls and authentication
+- Implement rate limiting if exposing signing endpoints
+
+### Development vs Production
+
+This library supports multiple environments via `baseUrl`:
+
+```javascript
+// Development
+const devClient = createEmblemClient({
+  apiKey: process.env.DEV_API_KEY,
+  baseUrl: "https://dev-api.emblemvault.ai"
+});
+
+// Production
+const prodClient = createEmblemClient({
+  apiKey: process.env.PROD_API_KEY,
+  baseUrl: "https://api.emblemvault.ai"
+});
+```
+
+API keys from one environment do not work in another, providing natural isolation.
+
+---
+
 ## Testing
 
 - Copy `.env.example` to `.env` and set:

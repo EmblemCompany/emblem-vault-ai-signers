@@ -33,7 +33,7 @@ describe("http bigint serialization", () => {
     };
 
     await emblemPost("/test", testData, {
-      apiKey: "test-key",
+      apiKey: "pk_test_1234567890abcdef",
       baseUrl: "https://test.example.com",
     });
 
@@ -85,7 +85,7 @@ describe("http bigint serialization", () => {
     };
 
     await emblemPost("/sign-eth-tx", txData, {
-      apiKey: "test-key",
+      apiKey: "pk_test_1234567890abcdef",
       baseUrl: "https://test.example.com",
     });
 
@@ -120,7 +120,7 @@ describe("http bigint serialization", () => {
     const { emblemPost } = await import("../src/http.ts");
 
     await emblemPost("/test", { zeroBigint: 0n }, {
-      apiKey: "test-key",
+      apiKey: "pk_test_1234567890abcdef",
       baseUrl: "https://test.example.com",
     });
 
@@ -150,7 +150,7 @@ describe("http bigint serialization", () => {
       undefinedValue: undefined,
       bigintValue: 42n,
     }, {
-      apiKey: "test-key",
+      apiKey: "pk_test_1234567890abcdef",
       baseUrl: "https://test.example.com",
     });
 

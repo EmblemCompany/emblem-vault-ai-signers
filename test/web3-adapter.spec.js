@@ -32,7 +32,7 @@ describe("web3 adapter (minimal)", () => {
       const u = new URL(String(url));
       const method = (init.method || "GET").toUpperCase();
 
-      if (u.pathname === "/vault/info" && method === "GET") return okJson(KNOWN_INFO);
+      if (u.pathname === "/vault/info" && method === "POST") return okJson(KNOWN_INFO);
       if (u.pathname === "/sign-eth-message" && method === "POST") {
         const body = JSON.parse(String(init.body));
         expect(body.vaultId).toBe(KNOWN_INFO.vaultId);
