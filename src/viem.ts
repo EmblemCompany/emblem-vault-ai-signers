@@ -14,24 +14,36 @@ export async function toViemAccount(config: EmblemRemoteConfig, infoOverride?: V
 
     async signMessage({ message }: { message: any }) {
       let payload: string;
+      let isRaw = false;
+
       if (typeof message === "string") {
         payload = message;
+        isRaw = false;
       } else if (message && typeof (message as any).raw !== "undefined") {
         const raw = (message as any).raw;
         payload = typeof raw === "string" ? raw : bytesToHex(raw);
+        isRaw = true;
       } else if (message instanceof Uint8Array) {
         payload = bytesToHex(message);
+        isRaw = false;
       } else if (isHexString(message)) {
         payload = message as string;
+        isRaw = false;
       } else {
         // Don't silently convert objects to "[object Object]"
-        throw new Error(`Unsupported message type: ${typeof message}. Expected string, Uint8Array, or hex string.`);
+        throw new Error(
+          `Unsupported message type: ${typeof message}. Expected string, Uint8Array, or hex string.`
+        );
       }
 
       const data = await emblemPost<{
         signerAddress: string;
         signature: Hex;
-      }>("/sign-eth-message", { vaultId, message: payload }, config);
+      }>(
+        "/sign-eth-message",
+        { vaultId, message: payload, raw: isRaw },
+        config
+      );
 
       return data.signature;
     },

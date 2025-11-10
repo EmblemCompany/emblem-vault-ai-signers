@@ -9,12 +9,27 @@ const BASE_URL = process.env.EMBLEM_BASE_URL || "https://api.emblemvault.ai";
 const run = API_KEY ? it : it.skip;
 
 describe("integration: viem adapter", () => {
-  run("signs and verifies message", async () => {
+  run("signs and verifies message (UTF-8 string)", async () => {
     const client = createEmblemClient({ apiKey: API_KEY!, baseUrl: BASE_URL });
     const account = await client.toViemAccount();
     const message = `hello-from-integration-${Date.now()}`;
     const sig = await account.signMessage({ message });
     const ok = await verifyMessage({ address: account.address, message, signature: sig });
+    expect(ok).toBe(true);
+  });
+
+  run("signs and verifies message (raw hex)", async () => {
+    const client = createEmblemClient({ apiKey: API_KEY!, baseUrl: BASE_URL });
+    const account = await client.toViemAccount();
+    // Sign a raw hex message
+    const rawMessage = "0x48656c6c6f20576f726c64"; // "Hello World" in hex
+    const sig = await account.signMessage({ message: { raw: rawMessage } as any });
+    // Verify using the raw format
+    const ok = await verifyMessage({
+      address: account.address,
+      message: { raw: rawMessage } as any,
+      signature: sig
+    });
     expect(ok).toBe(true);
   });
 
