@@ -23,7 +23,9 @@
     "test": "vitest run --reporter=verbose",
     "test:watch": "vitest --reporter=verbose",
     "test:ci": "vitest run --reporter=default",
-    "test:integration": "vitest -c vitest.int.config.ts run --reporter=verbose"
+    "test:integration": "vitest -c vitest.int.config.ts run --reporter=verbose",
+    "test:all": "npm test && npm run test:integration",
+    "release:patch": "npm version patch && npm run build && npm run test:all && npm publish"
   },
   "keywords": [
     "emblem",

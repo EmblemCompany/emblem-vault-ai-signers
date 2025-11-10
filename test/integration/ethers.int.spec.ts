@@ -49,4 +49,31 @@ describe("integration: ethers adapter", () => {
     const parsed = Transaction.from(raw);
     expect(parsed.from?.toLowerCase()).toBe(addr.toLowerCase());
   });
+
+  run("handles large bigint values in transaction", async () => {
+    const client = createEmblemClient({ apiKey: API_KEY!, baseUrl: BASE_URL });
+    const wallet = await client.toEthersWallet(null);
+    const addr = await wallet.getAddress();
+
+    // Test with large bigint values that would fail with standard JSON.stringify
+    const largeValue = 1000000000000000000n; // 1 ETH in wei
+    const largeGasLimit = 500000n;
+    const largeMaxFeePerGas = 100000000000n; // 100 gwei
+    const largePriorityFee = 2000000000n; // 2 gwei
+
+    const raw = await wallet.signTransaction({
+      to: addr,
+      value: largeValue,
+      chainId: 1,
+      nonce: 0,
+      gasLimit: largeGasLimit,
+      maxFeePerGas: largeMaxFeePerGas,
+      maxPriorityFeePerGas: largePriorityFee,
+    } as any);
+
+    const parsed = Transaction.from(raw);
+    expect(parsed.from?.toLowerCase()).toBe(addr.toLowerCase());
+    expect(parsed.value).toBe(largeValue);
+    expect(parsed.gasLimit).toBe(largeGasLimit);
+  });
 });

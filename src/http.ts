@@ -11,7 +11,9 @@ export async function emblemPost<T = any>(
       "content-type": "application/json",
       "x-api-key": apiKey,
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(body, (key: string, value: any) =>
+      typeof value === "bigint" ? value.toString() : value
+    ),
   });
 
   if (!res.ok) {
