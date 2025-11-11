@@ -37,6 +37,9 @@ export function normalizeTxForEmblem(tx: any): any {
   // Remove fields commonly unsupported by legacy serializers
   delete out.type;
   delete out.accessList;
+  delete out.account;
+  delete out.chain;
+  delete out.from;
 
   return out;
 }

@@ -103,4 +103,86 @@ describe("integer overflow protection", () => {
     expect(typeof result.nonce).toBe("number");
     expect(typeof result.chainId).toBe("number");
   });
+
+  it("removes unsupported fields: type, accessList", async () => {
+    const { normalizeTxForEmblem } = await import("../src/utils.ts");
+
+    const tx = {
+      to: "0x1234567890123456789012345678901234567890",
+      value: 1000n,
+      nonce: 1,
+      chainId: 1,
+      type: 2, // EIP-1559 type
+      accessList: [{ address: "0xabcd", storageKeys: [] }],
+    };
+
+    const result = normalizeTxForEmblem(tx);
+
+    // These fields should be removed
+    expect(result.type).toBeUndefined();
+    expect(result.accessList).toBeUndefined();
+
+    // Other fields should remain
+    expect(result.to).toBe("0x1234567890123456789012345678901234567890");
+    expect(result.value).toBe("0x3e8");
+  });
+
+  it("removes viem-specific fields: account, chain, from", async () => {
+    const { normalizeTxForEmblem } = await import("../src/utils.ts");
+
+    const tx = {
+      to: "0x1234567890123456789012345678901234567890",
+      value: 1000n,
+      nonce: 1,
+      chainId: 1,
+      account: { address: "0xabcd", type: "json-rpc" }, // viem account object
+      chain: { id: 1, name: "mainnet" }, // viem chain object
+      from: "0xabcd1234567890123456789012345678abcd1234", // from address
+    };
+
+    const result = normalizeTxForEmblem(tx);
+
+    // These viem-specific fields should be removed
+    expect(result.account).toBeUndefined();
+    expect(result.chain).toBeUndefined();
+    expect(result.from).toBeUndefined();
+
+    // Other fields should remain
+    expect(result.to).toBe("0x1234567890123456789012345678901234567890");
+    expect(result.value).toBe("0x3e8");
+    expect(result.nonce).toBe(1);
+    expect(result.chainId).toBe(1);
+  });
+
+  it("removes all unsupported fields in combination", async () => {
+    const { normalizeTxForEmblem } = await import("../src/utils.ts");
+
+    const tx = {
+      to: "0x1234567890123456789012345678901234567890",
+      value: 1000n,
+      nonce: 1,
+      chainId: 1,
+      // All fields that should be removed
+      type: 2,
+      accessList: [],
+      account: { address: "0xabcd" },
+      chain: { id: 1 },
+      from: "0xabcd1234567890123456789012345678abcd1234",
+    };
+
+    const result = normalizeTxForEmblem(tx);
+
+    // All unsupported fields should be removed
+    expect(result.type).toBeUndefined();
+    expect(result.accessList).toBeUndefined();
+    expect(result.account).toBeUndefined();
+    expect(result.chain).toBeUndefined();
+    expect(result.from).toBeUndefined();
+
+    // Supported fields should remain
+    expect(result.to).toBe("0x1234567890123456789012345678901234567890");
+    expect(result.value).toBe("0x3e8");
+    expect(result.nonce).toBe(1);
+    expect(result.chainId).toBe(1);
+  });
 });
