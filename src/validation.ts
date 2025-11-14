@@ -23,29 +23,22 @@ export function isNodeEnvironment(): boolean {
 /**
  * Validate API key format and warn about potential security issues
  */
-export function validateApiKey(apiKey: string, options: { warnOnBrowser?: boolean } = {}): void {
-  if (!apiKey || typeof apiKey !== 'string') {
-    throw new Error('apiKey is required and must be a string');
+export function validateApiKey(apiKey?: string, options: { warnOnBrowser?: boolean } = {}): void {
+  if (apiKey == null) return; // optional
+  if (typeof apiKey !== 'string') {
+    throw new Error('apiKey must be a string when provided');
   }
-
   if (apiKey.trim() === '') {
     throw new Error('apiKey cannot be empty or whitespace');
   }
-
-  // Warn if API key looks like it might be exposed in client-side code
   if (options.warnOnBrowser !== false && isBrowserEnvironment()) {
     console.warn(
-      '[Emblem Security Warning] API key is being used in a browser environment. ' +
-      'API keys should only be used server-side (Node.js). ' +
-      'Client-side usage exposes your API key to anyone who can view the page source. ' +
-      'To suppress this warning, pass { warnOnBrowser: false } to createEmblemClient().'
+      '[Emblem Security Warning] API key is being used in a browser environment. '
+      + 'Prefer JWT or a secure server-side usage. '
+      + 'To suppress this warning, pass { warnOnBrowser: false } to createEmblemClient().' 
     );
   }
-
-  // Check for common mistakes
-  if (apiKey.startsWith('pk_') || apiKey.startsWith('sk_')) {
-    // Looks like a typical API key format - good
-  } else if (apiKey.length < 16) {
+  if (!apiKey.startsWith('pk_') && !apiKey.startsWith('sk_') && apiKey.length < 16) {
     console.warn('[Emblem Security Warning] API key seems unusually short. Is this correct?');
   }
 }
@@ -130,7 +123,17 @@ export interface EmblemSecurityConfig extends EmblemRemoteConfig {
  * Comprehensive configuration validation
  */
 export function validateConfig(config: EmblemSecurityConfig): void {
-  // Validate API key
+  // Validate auth: require at least one method (apiKey, jwt, getJwt, getAuthHeaders, sdk)
+  const hasApiKey = !!config.apiKey;
+  const hasJwt = !!config.jwt;
+  const hasGetJwt = typeof config.getJwt === 'function';
+  const hasHeaders = typeof config.getAuthHeaders === 'function';
+  const hasSdk = !!config.sdk && typeof config.sdk.getSession === 'function';
+  if (!hasApiKey && !hasJwt && !hasGetJwt && !hasHeaders && !hasSdk) {
+    throw new Error('Authentication required: provide apiKey, jwt, getJwt(), getAuthHeaders(), or sdk');
+  }
+
+  // Validate API key if present
   validateApiKey(config.apiKey, { warnOnBrowser: config.warnOnBrowser });
 
   // Validate baseUrl if provided
@@ -143,7 +146,7 @@ export function validateConfig(config: EmblemSecurityConfig): void {
     console.log('[Emblem Security Debug]', {
       environment: isBrowserEnvironment() ? 'browser' : 'node',
       hasBaseUrl: !!config.baseUrl,
-      apiKeyLength: config.apiKey.length,
+      apiKeyLength: config.apiKey ? config.apiKey.length : 0,
       timestamp: new Date().toISOString(),
     });
   }

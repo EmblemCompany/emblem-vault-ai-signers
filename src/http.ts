@@ -20,16 +20,34 @@ function sanitizeErrorMessage(status: number, text: string): string {
   return errorMessage;
 }
 
+async function resolveAuthHeaders(config: EmblemRemoteConfig): Promise<Record<string, string>> {
+  // Priority: custom headers -> apiKey -> jwt/getJwt/sdk
+  if (typeof config.getAuthHeaders === 'function') {
+    const h = await config.getAuthHeaders();
+    if (h && typeof h === 'object') return h;
+  }
+  if (config.apiKey) {
+    return { 'x-api-key': config.apiKey };
+  }
+  const tok = config.jwt ?? (typeof config.getJwt === 'function' ? await config.getJwt() : undefined) ?? (config.sdk?.getSession()?.authToken ?? undefined);
+  if (tok) {
+    return { 'Authorization': `Bearer ${tok}` };
+  }
+  throw new Error('No authentication available: provide apiKey, jwt, getJwt(), getAuthHeaders(), or sdk');
+}
+
 export async function emblemPost<T = any>(
   path: string,
   body: any,
-  { apiKey, baseUrl = "https://api.emblemvault.ai" }: EmblemRemoteConfig
+  config: EmblemRemoteConfig
 ): Promise<T> {
+  const baseUrl = config.baseUrl ?? "https://api.emblemvault.ai";
+  const authHeaders = await resolveAuthHeaders(config);
   const res = await fetch(`${baseUrl}${path}`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      "x-api-key": apiKey,
+      ...authHeaders,
     },
     body: JSON.stringify(body, (key: string, value: any) =>
       typeof value === "bigint" ? value.toString() : value
@@ -46,13 +64,13 @@ export async function emblemPost<T = any>(
 
 export async function emblemGet<T = any>(
   path: string,
-  { apiKey, baseUrl = "https://api.emblemvault.ai" }: EmblemRemoteConfig
+  config: EmblemRemoteConfig
 ): Promise<T> {
+  const baseUrl = config.baseUrl ?? "https://api.emblemvault.ai";
+  const authHeaders = await resolveAuthHeaders(config);
   const res = await fetch(`${baseUrl}${path}`, {
     method: "GET",
-    headers: {
-      "x-api-key": apiKey,
-    },
+    headers: authHeaders,
   });
 
   if (!res.ok) {
