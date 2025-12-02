@@ -50,7 +50,8 @@ npm view emblem-vault-ai-signers versions
 To see the current experimental version:
 
 ```bash
-npm view emblem-vault-ai-signers@experimental version
+npm view 
+ version
 ```
 
 ## Important Notes

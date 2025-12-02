@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.8-experimental.0] - 2025-11-30
+
+Added
+- Optional JWT/SDK authentication as alternative to API key
+  - `jwt`: Static JWT string for Bearer token auth
+  - `getJwt()`: Function (sync or async) to retrieve JWT dynamically
+  - `sdk`: SDK object with `getSession()` method returning `{ authToken }`
+  - `getAuthHeaders()`: Function for fully custom auth headers
+- Authentication priority: `getAuthHeaders` > `apiKey` > `jwt` > `getJwt` > `sdk`
+
+Changed
+- Relaxed vault/info response validation to support broader API responses
+- `apiKey` is now optional when using JWT or SDK authentication
+- Authentication error messages now reference "Authentication required" instead of "apiKey is required"
+
+Tests
+- Add comprehensive JWT authentication test suite (20+ tests)
+- Test coverage for all auth methods: static JWT, dynamic getJwt, SDK integration, custom headers
+- Tests for auth priority, error handling, and adapter compatibility
+
+## [0.1.7] - 2025-11-11
+
+Fixed
+- Release version bump only (consolidates 0.1.6 changes)
+
 ## [0.1.6] - 2025-11-10
 
 Added
@@ -102,6 +127,8 @@ Initial
 - Transaction normalization for backend serializers
 - Unit tests and integration tests using .env
 
+[0.1.8-experimental.0]: https://www.npmjs.com/package/emblem-vault-ai-signers/v/0.1.8-experimental.0
+[0.1.7]: https://github.com/EmblemCompany/emblem-vault-ai-signers/releases/tag/v0.1.7
 [0.1.6]: https://github.com/EmblemCompany/emblem-vault-ai-signers/releases/tag/v0.1.6
 [0.1.5]: https://github.com/EmblemCompany/emblem-vault-ai-signers/releases/tag/v0.1.5
 [0.1.4]: https://github.com/EmblemCompany/emblem-vault-ai-signers/releases/tag/v0.1.4
