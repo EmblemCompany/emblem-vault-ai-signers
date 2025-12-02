@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.8-experimental.1] - 2025-12-02
+## [0.1.8-experimental.2] - 2025-12-02
 
 Added
 - Full Solana support with @solana/web3.js compatibility
@@ -150,7 +150,7 @@ Initial
 - Transaction normalization for backend serializers
 - Unit tests and integration tests using .env
 
-[0.1.8-experimental.1]: https://www.npmjs.com/package/emblem-vault-ai-signers/v/0.1.8-experimental.1
+[0.1.8-experimental.2]: https://www.npmjs.com/package/emblem-vault-ai-signers/v/0.1.8-experimental.2
 [0.1.8-experimental.0]: https://www.npmjs.com/package/emblem-vault-ai-signers/v/0.1.8-experimental.0
 [0.1.7]: https://github.com/EmblemCompany/emblem-vault-ai-signers/releases/tag/v0.1.7
 [0.1.6]: https://github.com/EmblemCompany/emblem-vault-ai-signers/releases/tag/v0.1.6

@@ -48,8 +48,8 @@ export class EmblemSolanaSigner implements SolanaSignerInterface, SolanaKitSigne
     // Try to decode as base58 first (Solana standard)
     try {
       // Use @solana/web3.js bs58 decoder if available, otherwise fallback
-      if (typeof window !== 'undefined' && window.bs58) {
-        return window.bs58.decode(response.signature);
+      if (typeof window !== 'undefined' && (window as any).bs58) {
+        return (window as any).bs58.decode(response.signature);
       }
       // For Node.js environments or if bs58 is not globally available
       // The signature might be base64 encoded
