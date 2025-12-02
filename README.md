@@ -7,8 +7,8 @@ Remote signer adapters for Emblem Vault that plug into popular Ethereum librarie
   - Implements `initialize()`, `getVaultId()`, `setChainId()`, `getChainId()`
   - Adds `signAndBroadcast(tx, waitForReceipt?)` helper (optional)
 - `toWeb3Adapter()` – returns a minimal Web3-style signer adapter (EVM)
-- `toSolanaWeb3Signer()` – returns a stub Solana signer with `publicKey`
-- `toSolanaKitSigner()` – returns a stub Solana signer with `publicKey`
+- `toSolanaWeb3Signer()` – creates a @solana/web3.js compatible signer
+- `toSolanaKitSigner()` – creates a Solana Kit compatible signer
 
 > Note: The ethers adapter targets ethers v6.
 
@@ -20,6 +20,9 @@ See the Changelog for release details: CHANGELOG.md
 npm install emblem-vault-ai-signers
 # and bring your own peers
 npm install ethers viem
+
+# Optional: for Solana support
+npm install @solana/web3.js
 
 # Optional: for SDK integration
 npm install emblem-auth-sdk
@@ -66,11 +69,44 @@ const txHash = await wallet.signAndBroadcast({ to: "0x...", value: 1n }, true);
 const web3Adapter = await client.toWeb3Adapter();
 await web3Adapter.signMessage("hello");
 
-// Solana stubs (address only; signing not yet implemented)
+// Solana (@solana/web3.js compatible)
 const solWeb3 = await client.toSolanaWeb3Signer();
-console.log(solWeb3.publicKey);
+console.log(solWeb3.publicKey); // base58 Solana address
+
+// Sign a message
+const signature = await solWeb3.signMessage("Hello Solana");
+
+// Sign a transaction
+import { VersionedTransaction, TransactionMessage, SystemProgram, PublicKey } from "@solana/web3.js";
+
+const fromPubkey = new PublicKey(solWeb3.publicKey);
+const toPubkey = new PublicKey("...");
+
+const messageV0 = new TransactionMessage({
+  payerKey: fromPubkey,
+  recentBlockhash: "...", // fetch from connection
+  instructions: [
+    SystemProgram.transfer({
+      fromPubkey,
+      toPubkey,
+      lamports: 1000000,
+    }),
+  ],
+}).compileToV0Message();
+
+const transaction = new VersionedTransaction(messageV0);
+const signedTx = await solWeb3.signTransaction(transaction);
+
+// Sign and broadcast
+const txSignature = await solWeb3.signAndBroadcast(transaction, true);
+
+// Utility methods
+const vaultId = solWeb3.getVaultId();
+const canSign = solWeb3.canSign(solWeb3.publicKey); // true
+
+// Solana Kit compatible signer
 const solKit = await client.toSolanaKitSigner();
-console.log(solKit.publicKey);
+// Same interface as solWeb3
 ```
 
 ## Authentication
@@ -305,13 +341,43 @@ const provider = new JsonRpcProvider(process.env.RPC_URL!);
 await provider.broadcastTransaction(rawTransaction);
 ```
 
-### Solana (stubs)
+### Solana (@solana/web3.js)
 
-These expose the Solana address derived from the vault. Signing is not implemented yet.
+Full Solana signing support with message and transaction signing via remote vault.
 
 ```ts
-const solWeb3 = await client.toSolanaWeb3Signer();
-console.log(solWeb3.publicKey);
+const client = createEmblemClient({ apiKey: process.env.EMBLEM_API_KEY! });
+
+// Create Solana signer
+const solSigner = await client.toSolanaWeb3Signer();
+console.log(solSigner.publicKey); // Base58 Solana address
+
+// Sign messages
+const message = "Hello Solana";
+const signature = await solSigner.signMessage(message);
+console.log(signature); // Uint8Array signature
+
+// Sign transactions
+const transaction = new Transaction()
+  .add(SystemProgram.transfer({
+    fromPubkey: new PublicKey(solSigner.publicKey),
+    toPubkey: new PublicKey("recipient-address"),
+    lamports: 1000000 // 0.001 SOL
+  }));
+
+// Option 1: Sign only
+const signedTx = await solSigner.signTransaction(transaction);
+
+// Option 2: Sign and broadcast
+const txSignature = await solSigner.signAndBroadcast(transaction, true);
+console.log("Transaction signature:", txSignature);
+
+// Utility methods
+console.log("Vault ID:", solSigner.getVaultId());
+console.log("Can sign for this key?", solSigner.canSign(solSigner.publicKey));
+
+// Both @solana/web3.js and Solana Kit compatible
+const solKit = await client.toSolanaKitSigner(); // Same interface
 ```
 
 ## API
@@ -332,8 +398,8 @@ createEmblemClient(config): EmblemVaultClient
 EmblemVaultClient#toViemAccount(): Promise<Account>
 EmblemVaultClient#toEthersWallet(provider?): Promise<Signer>
 EmblemVaultClient#toWeb3Adapter(): Promise<{ address, signMessage, signTypedData, signTransaction }>
-EmblemVaultClient#toSolanaWeb3Signer(): Promise<{ publicKey }>
-EmblemVaultClient#toSolanaKitSigner(): Promise<{ publicKey }>
+EmblemVaultClient#toSolanaWeb3Signer(): Promise<{ publicKey, signMessage, signTransaction, signAndBroadcast, getVaultId, canSign, signAllTransactions }>
+EmblemVaultClient#toSolanaKitSigner(): Promise<{ publicKey, signMessage, signTransaction, signAndBroadcast, getVaultId, canSign, signAllTransactions }>
 
 Ethers wallet (v6) adds:
 - initialize(): Promise<void>
@@ -345,9 +411,14 @@ Ethers wallet (v6) adds:
 
 Adapters POST to the Emblem API endpoints:
 
+**EVM:**
 - `POST /sign-eth-message` – `{ vaultId, message }`
 - `POST /sign-typed-message` – `{ vaultId, domain, types, message }`
 - `POST /sign-eth-tx` – `{ vaultId, transaction }` (expects ethers-serializable fields)
+
+**Solana:**
+- `POST /sign-solana-message` – `{ vaultId, message }` (base64 encoded)
+- `POST /sign-solana-transaction` – `{ vaultId, transactionToSign, broadcast, versionedTransaction }` (base64 serialized)
 
 On first use, both adapters query `POST /vault/info` with authentication headers to obtain:
 
@@ -356,6 +427,42 @@ On first use, both adapters query `POST /vault/info` with authentication headers
 - EVM Address
 
 Transactions are normalized to hex/number-like fields before submission.
+
+### Solana
+
+Old (local keypair):
+```ts
+import { Keypair, Transaction } from "@solana/web3.js";
+
+const keypair = Keypair.fromSecretKey(bs58.decode(process.env.PRIVATE_KEY!));
+const transaction = new Transaction().add(...);
+transaction.sign(keypair);
+```
+
+New (Emblem remote signer):
+```ts
+import { createEmblemClient } from "emblem-vault-ai-signers";
+import { VersionedTransaction, TransactionMessage } from "@solana/web3.js";
+
+const client = createEmblemClient({ apiKey: process.env.EMBLEM_API_KEY! });
+const signer = await client.toSolanaWeb3Signer();
+
+// Sign messages
+const msgSignature = await signer.signMessage("Hello Solana");
+
+// Sign versioned transactions
+const messageV0 = new TransactionMessage({
+  payerKey: new PublicKey(signer.publicKey),
+  recentBlockhash: "...",
+  instructions: [...]
+}).compileToV0Message();
+
+const transaction = new VersionedTransaction(messageV0);
+const signedTx = await signer.signTransaction(transaction);
+
+// Sign and broadcast
+const txSig = await signer.signAndBroadcast(transaction, true);
+```
 
 ## Security Considerations
 

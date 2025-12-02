@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.8-experimental.1] - 2025-12-02
+
+Added
+- Full Solana support with @solana/web3.js compatibility
+  - `toSolanaWeb3Signer()`: Returns signer compatible with @solana/web3.js
+  - `toSolanaKitSigner()`: Returns signer compatible with Solana Kit
+  - Message signing via `/sign-solana-message` endpoint
+  - Transaction signing and broadcasting via `/sign-solana-transaction`
+  - Support for VersionedTransaction and legacy Transaction formats
+  - Utility methods: `getVaultId()`, `canSign()`, `signAllTransactions()`
+- Comprehensive Solana integration tests (6 tests)
+- Updated unit tests to verify remote signing architecture (no private keys)
+
+Changed
+- Solana adapters upgraded from stubs to full implementation
+- Solana signers now properly handle base58 addresses and base64 serialization
+- Accept 66-byte signatures from Lit Protocol (vs standard 64-byte Ed25519)
+
+Fixed
+- Transaction serialization for Solana VersionedTransaction objects
+- Proper base64 encoding/decoding for Solana message and transaction signing
+- API endpoint integration for Solana operations
+
 ## [0.1.8-experimental.0] - 2025-11-30
 
 Added
@@ -127,6 +150,7 @@ Initial
 - Transaction normalization for backend serializers
 - Unit tests and integration tests using .env
 
+[0.1.8-experimental.1]: https://www.npmjs.com/package/emblem-vault-ai-signers/v/0.1.8-experimental.1
 [0.1.8-experimental.0]: https://www.npmjs.com/package/emblem-vault-ai-signers/v/0.1.8-experimental.0
 [0.1.7]: https://github.com/EmblemCompany/emblem-vault-ai-signers/releases/tag/v0.1.7
 [0.1.6]: https://github.com/EmblemCompany/emblem-vault-ai-signers/releases/tag/v0.1.6
