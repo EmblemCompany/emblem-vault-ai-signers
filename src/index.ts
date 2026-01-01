@@ -1,4 +1,4 @@
-import type { Provider } from "ethers";
+import type { AbstractProvider } from "ethers";
 import type { EmblemRemoteConfig } from "./types.js";
 export type { EmblemRemoteConfig, Hex, VaultInfo } from "./types.js";
 export type { EmblemSecurityConfig } from "./validation.js";
@@ -39,7 +39,7 @@ export class EmblemVaultClient {
     return toViemAccount(this.config, info);
   }
 
-  async toEthersWallet(provider?: Provider | null): Promise<EmblemEthersWallet> {
+  async toEthersWallet(provider?: AbstractProvider | null): Promise<EmblemEthersWallet> {
     const info = await this.getInfo();
     return toEthersWallet(this.config, provider ?? null, info);
   }
