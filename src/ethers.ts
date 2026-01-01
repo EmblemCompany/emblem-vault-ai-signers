@@ -4,7 +4,7 @@ import { bytesToHex, normalizeTxForEmblem } from "./utils.js";
 import { fetchVaultInfo } from "./vault.js";
 import { AbstractSigner, resolveAddress } from "ethers";
 import type {
-  Provider,
+  AbstractProvider,
   TransactionLike,
   TransactionRequest,
   TransactionResponse,
@@ -19,7 +19,7 @@ export class EmblemEthersWallet extends AbstractSigner {
   private _chainId = 1;
   private _initPromise?: Promise<void>;
 
-  constructor(config: EmblemRemoteConfig, provider?: Provider | null, seed?: { address?: `0x${string}`; vaultId?: string; chainId?: number }) {
+  constructor(config: EmblemRemoteConfig, provider?: AbstractProvider | null, seed?: { address?: `0x${string}`; vaultId?: string; chainId?: number }) {
     super(provider ?? null);
     this._config = config;
     if (seed?.address) this._address = seed.address;
@@ -61,7 +61,7 @@ export class EmblemEthersWallet extends AbstractSigner {
     return this._chainId;
   }
 
-  connect(provider: Provider): EmblemEthersWallet {
+  connect(provider: AbstractProvider): EmblemEthersWallet {
     if (!provider) throw new Error("Provider cannot be null");
     return new EmblemEthersWallet(this._config, provider, { address: this._address ?? undefined, vaultId: this._vaultId ?? undefined, chainId: this._chainId });
   }
@@ -202,7 +202,7 @@ export class EmblemEthersWallet extends AbstractSigner {
   }
 }
 
-export async function toEthersWallet(config: EmblemRemoteConfig, provider?: Provider | null, infoOverride?: VaultInfo) {
+export async function toEthersWallet(config: EmblemRemoteConfig, provider?: AbstractProvider | null, infoOverride?: VaultInfo) {
   const info = infoOverride ?? (await fetchVaultInfo(config));
   return new EmblemEthersWallet(config, provider ?? null, { address: info.evmAddress, vaultId: info.vaultId });
 }
