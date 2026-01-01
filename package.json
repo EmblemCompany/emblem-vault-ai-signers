@@ -33,13 +33,20 @@
     "vault",
     "signer",
     "ethers",
-    "viem"
+    "viem",
+    "solana"
   ],
   "author": "",
   "license": "MIT",
   "peerDependencies": {
     "ethers": "^6.10.0",
-    "viem": "^2.0.0"
+    "viem": "^2.0.0",
+    "@solana/web3.js": "^1.95.0"
+  },
+  "peerDependenciesMeta": {
+    "ethers": { "optional": true },
+    "viem": { "optional": true },
+    "@solana/web3.js": { "optional": true }
   },
   "devDependencies": {
     "@solana/web3.js": "^1.95.0",
