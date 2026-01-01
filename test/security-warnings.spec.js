@@ -34,7 +34,7 @@ describe("security warnings", () => {
   it("throws on empty API key", async () => {
     const { createEmblemClient } = await import("../src/index.ts");
 
-    expect(() => createEmblemClient({ apiKey: "" })).toThrow("apiKey is required");
+    expect(() => createEmblemClient({ apiKey: "" })).toThrow("Authentication required");
   });
 
   it("throws on whitespace-only API key", async () => {

@@ -142,7 +142,7 @@ describe("integration: security features", () => {
 
   run("validates config with empty apiKey", () => {
     expect(() => createEmblemClient({ apiKey: "" })).toThrow(
-      "apiKey is required"
+      "Authentication required"
     );
   });
 

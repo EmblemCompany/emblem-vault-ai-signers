@@ -1,6 +1,6 @@
 {
   "name": "emblem-vault-ai-signers",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "description": "Emblem Vault remote signer adapters for viem and ethers",
   "type": "module",
   "main": "dist/index.js",
@@ -25,7 +25,8 @@
     "test:ci": "vitest run --reporter=default",
     "test:integration": "vitest -c vitest.int.config.ts run --reporter=verbose",
     "test:all": "npm test && npm run test:integration",
-    "release:patch": "npm version patch && npm run build && npm run test:all && npm publish"
+    "release:patch": "npm version patch && npm run build && npm run test:all && npm publish",
+    "release:experimental": "npm version prerelease --preid=experimental && npm run build && npm run test:all && npm publish --tag experimental"
   },
   "keywords": [
     "emblem",
@@ -41,10 +42,13 @@
     "viem": "^2.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
-    "vitest": "^1.6.0",
+    "@solana/web3.js": "^1.95.0",
+    "bs58": "^6.0.0",
     "dotenv": "^16.4.5",
     "ethers": "^6.10.0",
-    "viem": "^2.0.0"
+    "tweetnacl": "^1.0.3",
+    "typescript": "^5.3.3",
+    "viem": "^2.0.0",
+    "vitest": "^1.6.0"
   }
 }
